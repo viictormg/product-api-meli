@@ -1,0 +1,40 @@
+version: '3'
+services:
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - cache_redis:/data
+    networks:
+      - meli
+  db:
+    image: postgres:11
+    container_name: postgresdb
+    restart: always
+    expose:
+      - '5432'
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_DB=products_db
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_USER=postgresql
+      - POSTGRES_PASSWORD=root
+    volumes:
+      - '.db/data:/var/lib/postgresql/data'
+    networks:
+      - meli
+    healthcheck:
+      test: [ "CMD", "pg_isready -d db-name -U db-user" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+networks:
+  meli:
+    name: meli
+volumes:
+  cache_redis:
+    driver: local
+  db_data:
