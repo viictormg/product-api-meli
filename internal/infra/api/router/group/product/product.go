@@ -6,19 +6,19 @@ import (
 )
 
 const (
-	anomalyPathV1 = "/anomaly"
+	productPathV1 = "/product"
 )
 
-type AnomalyInterfaceRoute struct{}
+type ProductInterfaceRoute struct{}
 
-func NewAnomalyInterfaceRoute(group *echo.Group, handler product.AnomalyHandlerIF) {
-	routes := group.Group(anomalyPathV1)
+func NewProductInterfaceRoute(group *echo.Group, handler product.ProductHandlerIF) {
+	routes := group.Group(productPathV1)
 
-	routes.POST("", handler.UpdatePrice)
+	routes.PATCH("/:id", handler.UpdatePrice)
 }
 
-func NewAnomalyInterfaceRoutes(group *echo.Group, handler product.AnomalyHandlerIF) *AnomalyInterfaceRoute {
-	NewAnomalyInterfaceRoute(group, handler)
+func NewProductInterfaceRoutes(group *echo.Group, handler product.ProductHandlerIF) *ProductInterfaceRoute {
+	NewProductInterfaceRoute(group, handler)
 
-	return &AnomalyInterfaceRoute{}
+	return &ProductInterfaceRoute{}
 }

@@ -1,0 +1,3 @@
+ALTER TABLE price_history ADD COLUMN order_closed TIMESTAMP;
+ALTER TABLE price_history ALTER COLUMN created_at SET DEFAULT CURRENT_TIMESTAMP;
+

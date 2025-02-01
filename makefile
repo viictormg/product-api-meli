@@ -6,7 +6,8 @@ DB_NAME := $(shell grep DB_NAME .env | cut -d '=' -f 2)
 
 
 requirements-up:
-	docker-compose up -d
+	docker-compose -f docker-compose.yml up -d
+
 
 migration-files:
 	@read -p "Enter the title: " title; \

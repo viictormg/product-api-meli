@@ -10,8 +10,8 @@ import (
 )
 
 func NewHTTPServer(lc fx.Lifecycle) *echo.Echo {
-	srv := &http.Server{Addr: ":8080"}
-	echoServer := echo.New() 
+	srv := &http.Server{Addr: ":3000"}
+	echoServer := echo.New()
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
