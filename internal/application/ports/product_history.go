@@ -16,3 +16,8 @@ type ProductHistoryRepositoryIF interface {
 		productHistory entity.ProductHistoryEntity,
 	) error
 }
+
+type ProductCacheHistoryRepositoryIF interface {
+	SaveProductHistory(productId string, limits *dto.PriceLimitsDTO) error
+	GetProductHistory(productId string) (*dto.PriceLimitsDTO, error)
+}

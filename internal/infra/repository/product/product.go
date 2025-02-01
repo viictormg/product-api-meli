@@ -26,3 +26,13 @@ func (pr *ProductRepository) UpdatePrice(
 	return tx, nil
 
 }
+
+func (pr *ProductRepository) GetProductByID(
+	ctx context.Context, productId string,
+) (entity.ProductEntity, error) {
+	var product entity.ProductEntity
+
+	err := pr.db.WithContext(ctx).Where("id = ?", productId).First(&product).Error
+
+	return product, err
+}

@@ -22,20 +22,27 @@ func NewProductHandler(usecase productUsecase.ProductUsecaseIF) ProductHandlerIF
 	}
 }
 
-func (a *ProductHandler) UpdatePrice(context echo.Context) error {
+func (p *ProductHandler) UpdatePrice(context echo.Context) error {
 	var request dto.UpdatePriceRequest
 
-	productId := context.Param("id")
 	if err := context.Bind(&request); err != nil {
 		return context.JSON(http.StatusBadRequest, err)
 	}
 
-	ctx := context.Request().Context()
+	err := p.usecase.UpdatePrice(context.Request().Context(), request)
 
-	request.ProductID = productId
+	var metadata interface{} = nil
+	if err != nil {
+		metadata = map[string]interface{}{
+			"error": err.Error(),
+		}
+	}
 
-	err := a.usecase.UpdatePrice(ctx, request)
-
-	return context.JSON(http.StatusOK, err)
+	return context.JSON(http.StatusOK, dto.ProductResponseDTO{
+		ItemID:   request.ProductID,
+		Price:    request.Price,
+		Anomaly:  err != nil,
+		Metadata: metadata,
+	})
 
 }

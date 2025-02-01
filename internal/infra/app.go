@@ -16,8 +16,10 @@ func Run() {
 	fx.New(
 		fx.Provide(NewHTTPServer),
 		fx.Provide(db.NewPostgresConnection),
+		fx.Provide(db.NewRedisConnection),
 		fx.Provide(repo.NewProductRepository),
 		fx.Provide(repoHistory.NewProductHistoryRepository),
+		fx.Provide(repoHistory.NewProductCacheHistoryRepository),
 
 		// route
 		fx.Provide(NewEchoGroup),
