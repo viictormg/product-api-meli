@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	productUsecase "github.com/viictormg/product-api-meli/internal/application/usecases"
+	productUsecase "github.com/viictormg/product-api-meli/internal/application/product/usecases"
 	"github.com/viictormg/product-api-meli/internal/infra/api/handler/product/dto"
 )
 

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	dtoLimits "github.com/viictormg/product-api-meli/internal/application/dto"
-	ports "github.com/viictormg/product-api-meli/internal/application/ports"
+	dtoLimits "github.com/viictormg/product-api-meli/internal/application/product/dto"
+	ports "github.com/viictormg/product-api-meli/internal/application/product/ports"
 	"github.com/viictormg/product-api-meli/internal/domain/constants"
 	"github.com/viictormg/product-api-meli/internal/domain/entity"
 	"github.com/viictormg/product-api-meli/internal/infra/api/handler/product/dto"

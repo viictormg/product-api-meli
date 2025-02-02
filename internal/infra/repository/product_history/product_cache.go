@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/viictormg/product-api-meli/internal/application/dto"
-	"github.com/viictormg/product-api-meli/internal/application/ports"
+	"github.com/viictormg/product-api-meli/internal/application/product/dto"
+	"github.com/viictormg/product-api-meli/internal/application/product/ports"
 )
 
 type ProductCacheHistoryRepository struct {

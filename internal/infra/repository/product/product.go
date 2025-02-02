@@ -3,7 +3,7 @@ package product
 import (
 	"context"
 
-	"github.com/viictormg/product-api-meli/internal/application/ports"
+	"github.com/viictormg/product-api-meli/internal/application/product/ports"
 	"github.com/viictormg/product-api-meli/internal/domain/entity"
 	"gorm.io/gorm"
 )
