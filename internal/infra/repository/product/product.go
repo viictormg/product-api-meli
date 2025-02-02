@@ -2,6 +2,7 @@ package product
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/viictormg/product-api-meli/internal/application/product/ports"
 	"github.com/viictormg/product-api-meli/internal/domain/entity"
@@ -35,4 +36,15 @@ func (pr *ProductRepository) GetProductByID(
 	err := pr.db.WithContext(ctx).Where("id = ?", productId).First(&product).Error
 
 	return product, err
+}
+
+func (pr *ProductRepository) CreateProduct(
+	products []entity.ProductEntity,
+) (*gorm.DB, error) {
+
+	err := pr.db.Create(&products)
+
+	fmt.Println("ERRRR", err)
+
+	return nil, nil
 }

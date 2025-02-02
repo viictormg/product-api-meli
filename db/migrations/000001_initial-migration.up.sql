@@ -9,5 +9,4 @@ CREATE TABLE IF NOT EXISTS price_history (
     product_id VARCHAR(20) NOT NULL,
     price DECIMAL(10, 5) NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    CONSTRAINT fk_product_id FOREIGN KEY (product_id) REFERENCES product(id)
 );

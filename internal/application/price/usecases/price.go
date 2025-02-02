@@ -2,7 +2,13 @@ package usecases
 
 import (
 	"encoding/csv"
+	"encoding/json"
+	"fmt"
 	"mime/multipart"
+	"slices"
+	"strconv"
+
+	"github.com/viictormg/product-api-meli/internal/domain/constants"
 )
 
 type PriceUsecaseIF interface {
@@ -13,18 +19,57 @@ func NewPriceUsecase() PriceUsecaseIF {
 	return &PriceUsecase{}
 }
 
-type PriceUsecase struct{}
+type PriceUsecase struct {
+}
+
+type PriceHistory struct {
+	ProductID string  `json:"product_id"`
+	OrderDate string  `json:"order_date"`
+	Price     float64 `json:"price"`
+}
 
 func (h *PriceUsecase) UploadPriceFile(file *multipart.FileHeader) error {
-	_, err := extracDataFile(file)
+	data, err := extracDataFile(file)
 
 	if err != nil {
 		return err
 	}
 
-	PushPrice("price", []byte("price"))
+	for _, chunk := range data {
+
+		message := ConverteData(chunk)
+
+		PushPrice("price", message)
+
+	}
 
 	return nil
+}
+
+func ConverteData(data [][]string) []byte {
+	items := []PriceHistory{}
+
+	productIDs := []string{}
+
+	for _, record := range data {
+		priceProduct, _ := strconv.ParseFloat(record[2], 32)
+
+		if !slices.Contains(productIDs, record[0]) {
+			productIDs = append(productIDs, record[0])
+		}
+
+		price := PriceHistory{
+			ProductID: record[0],
+			OrderDate: record[1],
+			Price:     priceProduct,
+		}
+
+		items = append(items, price)
+	}
+
+	fmt.Println("Product IDs: ", productIDs)
+	jsonMessage, _ := json.Marshal(items)
+	return jsonMessage
 }
 
 func chunkData(data [][]string, chunkSize int) [][][]string {
@@ -48,5 +93,5 @@ func extracDataFile(file *multipart.FileHeader) ([][][]string, error) {
 		return nil, err
 	}
 
-	return chunkData(records, 500), nil
+	return chunkData(records, constants.BatchSize), nil
 }
