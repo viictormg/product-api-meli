@@ -11,6 +11,10 @@ type ProductHistoryEntity struct {
 	OrderClosed string  `gorm:"column:order_closed"`
 }
 
+func (p ProductHistoryEntity) IsEmpty() bool {
+	return p.ID == ""
+}
+
 func (ProductHistoryEntity) TableName() string {
 	return "price_history"
 }

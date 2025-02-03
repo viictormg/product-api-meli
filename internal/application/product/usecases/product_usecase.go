@@ -17,35 +17,23 @@ type ProductUsecaseIF interface {
 	UpdatePrice(ctx context.Context, product dto.UpdatePriceRequest) error
 }
 type productUsecase struct {
-	repository         ports.ProductRepositoryIF
 	respositoryHistory ports.ProductHistoryRepositoryIF
 	repositoryCache    ports.ProductCacheHistoryRepositoryIF
 }
 
 func NewProductUsecase(
-	repository ports.ProductRepositoryIF,
 	respositoryHistory ports.ProductHistoryRepositoryIF,
 	repositoryCache ports.ProductCacheHistoryRepositoryIF,
 
 ) ProductUsecaseIF {
 	return &productUsecase{
-		repository:         repository,
 		respositoryHistory: respositoryHistory,
 		repositoryCache:    repositoryCache,
 	}
 }
 
 func (p *productUsecase) UpdatePrice(ctx context.Context, product dto.UpdatePriceRequest) error {
-	productFound, err := p.repository.GetProductByID(ctx, product.ProductID)
-	if err != nil {
-		return errors.New("product not found")
-	}
-
-	if productFound.Price == product.Price {
-		return errors.New("price is the same")
-	}
-
-	priceIsInrage, err := p.priceIsInrage(product)
+	priceIsInrage, err := p.priceIsInrage(ctx, product)
 	if err != nil {
 		return err
 	}
@@ -58,24 +46,19 @@ func (p *productUsecase) UpdatePrice(ctx context.Context, product dto.UpdatePric
 }
 
 func (p *productUsecase) UpdatePriceProduct(ctx context.Context, product dto.UpdatePriceRequest) error {
-	trx, err := p.repository.UpdatePrice(ctx, product.ProductID, product.Price)
-	if err != nil {
-		trx.Rollback()
-		return err
-	}
 	productHistory := entity.NewProductHistoryEntity(
 		product.ProductID,
 		product.Price,
 		time.Now().Format(time.DateOnly),
 	)
 
-	err = p.respositoryHistory.CreateProductHistory(ctx, trx, productHistory)
+	trx, err := p.respositoryHistory.CreateProductHistory(ctx, productHistory)
 
 	if err != nil {
 		trx.Rollback()
 	}
 
-	err = p.SaveLimitsPriceCache(product)
+	err = p.SaveLimitsPriceCache(ctx, product)
 
 	if err != nil {
 		trx.Rollback()
@@ -84,29 +67,38 @@ func (p *productUsecase) UpdatePriceProduct(ctx context.Context, product dto.Upd
 	return trx.Commit().Error
 }
 
-func (p *productUsecase) priceIsInrage(product dto.UpdatePriceRequest) (bool, error) {
+func (p *productUsecase) priceIsInrage(ctx context.Context, product dto.UpdatePriceRequest) (bool, error) {
 	limits, err := p.GetLimitsPriceCache(product.ProductID)
 	if err != nil || limits == nil {
-		p.SaveLimitsPriceCache(product)
+		p.SaveLimitsPriceCache(ctx, product)
 		limits, err = p.GetLimitsPriceCache(product.ProductID)
 	}
-
-	fmt.Println(err, limits)
 
 	if err != nil || limits == nil {
 		return false, err
 	}
+
+	if limits.CurrentPrice == product.Price {
+		return true, errors.New("price is the same")
+	}
+
 	fmt.Println(product.Price, "UP:", limits.Min, "DOWM:", limits.Max)
 
 	return product.Price >= limits.Min && product.Price <= limits.Max, nil
 }
 
-func (p *productUsecase) SaveLimitsPriceCache(product dto.UpdatePriceRequest) error {
-	limits, err := p.GetAverageAndDeviation(product.ProductID)
-
+func (p *productUsecase) SaveLimitsPriceCache(ctx context.Context, product dto.UpdatePriceRequest) error {
+	limits, err := p.GetLimitsPriceDB(product.ProductID)
 	if err != nil || limits == nil {
 		return err
 	}
+
+	productFound, err := p.respositoryHistory.GetLastPrice(ctx, product.ProductID)
+	if err != nil || productFound.IsEmpty() {
+		return err
+	}
+
+	limits.CurrentPrice = productFound.Price
 
 	return p.repositoryCache.SaveProductHistory(product.ProductID, limits)
 }
@@ -115,7 +107,7 @@ func (p *productUsecase) GetLimitsPriceCache(product string) (*dtoLimits.PriceLi
 	return p.repositoryCache.GetProductHistory(product)
 }
 
-func (p *productUsecase) GetAverageAndDeviation(productID string) (*dtoLimits.PriceLimitsDTO, error) {
+func (p *productUsecase) GetLimitsPriceDB(productID string) (*dtoLimits.PriceLimitsDTO, error) {
 	stats, err := p.respositoryHistory.GetAverageAndDeviation(productID)
 
 	if err != nil {
@@ -124,6 +116,10 @@ func (p *productUsecase) GetAverageAndDeviation(productID string) (*dtoLimits.Pr
 
 	minLimit := stats.Average - constants.FactorLimitMin*stats.StandardDeviation
 	maxLimit := stats.Average + constants.FactorLimitMax*stats.StandardDeviation
+
+	if minLimit < 0 {
+		minLimit = 0
+	}
 
 	return &dtoLimits.PriceLimitsDTO{
 		Min: minLimit,

@@ -9,3 +9,11 @@ type ProductEntity struct {
 func (ProductEntity) TableName() string {
 	return "product"
 }
+
+func NewProductEntity(id string, name string, price float64) ProductEntity {
+	return ProductEntity{
+		Id:    id,
+		Name:  name,
+		Price: price,
+	}
+}

@@ -10,11 +10,12 @@ import (
 
 type ProductHistoryRepositoryIF interface {
 	GetAverageAndDeviation(productID string) (dto.PriceStatsDTO, error)
+
 	CreateProductHistory(
 		ctx context.Context,
-		tx *gorm.DB,
 		productHistory entity.ProductHistoryEntity,
-	) error
+	) (*gorm.DB, error)
+	GetLastPrice(ctx context.Context, productId string) (entity.ProductHistoryEntity, error)
 }
 
 type ProductCacheHistoryRepositoryIF interface {

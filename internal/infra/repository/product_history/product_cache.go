@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"time"
 
@@ -26,7 +25,7 @@ func (pr *ProductCacheHistoryRepository) SaveProductHistory(productId string, st
 	//
 	// Value: { "last_prices": [22.01, 19.809, 21.5], "avg": 21.1, "stddev": 1.2 }
 	// TTL: 24 horas
-	key := fmt.Sprintf("price:%s", productId)
+	key := productId
 	value, err := json.Marshal(stats)
 	if err != nil {
 		return err
@@ -41,7 +40,7 @@ func (pr *ProductCacheHistoryRepository) SaveProductHistory(productId string, st
 }
 
 func (pr *ProductCacheHistoryRepository) GetProductHistory(productId string) (*dto.PriceLimitsDTO, error) {
-	key := fmt.Sprintf("price:%s", productId)
+	key := productId
 	value, err := pr.db.Get(context.Background(), key).Result()
 	if err == redis.Nil {
 		log.Println("No history found for product ID", productId)

@@ -12,7 +12,6 @@ import (
 	"github.com/viictormg/product-api-meli/internal/infra/clients/db"
 	"github.com/viictormg/product-api-meli/internal/infra/clients/producer"
 	"github.com/viictormg/product-api-meli/internal/infra/events"
-	repo "github.com/viictormg/product-api-meli/internal/infra/repository/product"
 	repoHistory "github.com/viictormg/product-api-meli/internal/infra/repository/product_history"
 
 	"go.uber.org/fx"
@@ -26,7 +25,6 @@ func Run() {
 		fx.Provide(db.NewRedisConnection),
 		fx.Provide(producer.NewKafkaProducer),
 		// respositories
-		fx.Provide(repo.NewProductRepository),
 		fx.Provide(repoHistory.NewProductHistoryRepository),
 		fx.Provide(repoHistory.NewProductCacheHistoryRepository),
 		fx.Provide(events.NewPriceEvent),

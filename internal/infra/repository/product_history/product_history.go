@@ -31,14 +31,31 @@ func (pr *ProductHistoryRepository) GetAverageAndDeviation(productId string) (dt
 
 func (pr *ProductHistoryRepository) CreateProductHistory(
 	ctx context.Context,
-	tx *gorm.DB,
 	productHistory entity.ProductHistoryEntity,
-) error {
+) (*gorm.DB, error) {
+	tx := pr.db.WithContext(ctx).Begin()
 
-	if err := tx.Create(&productHistory).Error; err != nil {
-		return err
+	err := tx.Create(&productHistory).Error
+
+	return tx, err
+
+}
+
+func (pr *ProductHistoryRepository) GetLastPrice(
+	ctx context.Context, productId string,
+) (entity.ProductHistoryEntity, error) {
+
+	var productHistory entity.ProductHistoryEntity
+
+	err := pr.db.WithContext(ctx).
+		Where("product_id = ?", productId).
+		Order("created_at DESC, order_closed DESC").
+		First(&productHistory).
+		Error
+
+	if err != nil {
+		return productHistory, err
 	}
 
-	return nil
-
+	return productHistory, nil
 }

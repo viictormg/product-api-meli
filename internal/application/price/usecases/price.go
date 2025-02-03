@@ -7,6 +7,7 @@ import (
 	"mime/multipart"
 	"strconv"
 
+	"github.com/viictormg/product-api-meli/internal/application/price/dto"
 	"github.com/viictormg/product-api-meli/internal/application/price/ports"
 	"github.com/viictormg/product-api-meli/internal/domain/constants"
 )
@@ -25,12 +26,6 @@ func NewPriceUsecase(event ports.PriceEventyIF) PriceUsecaseIF {
 	}
 }
 
-type PriceHistory struct {
-	ProductID string  `json:"product_id"`
-	OrderDate string  `json:"order_date"`
-	Price     float64 `json:"price"`
-}
-
 func (h *PriceUsecase) UploadPriceFile(file *multipart.FileHeader) error {
 	data, err := extracDataFile(file)
 
@@ -40,7 +35,6 @@ func (h *PriceUsecase) UploadPriceFile(file *multipart.FileHeader) error {
 
 	for _, chunk := range data {
 		message := ConverteData(chunk)
-		// PushPrice("price", message)
 		h.event.SendPriceEvent(message)
 	}
 
@@ -50,12 +44,12 @@ func (h *PriceUsecase) UploadPriceFile(file *multipart.FileHeader) error {
 }
 
 func ConverteData(data [][]string) []byte {
-	items := []PriceHistory{}
+	items := []dto.PriceHistory{}
 
 	for _, record := range data {
 		priceProduct, _ := strconv.ParseFloat(record[2], 32)
 
-		price := PriceHistory{
+		price := dto.PriceHistory{
 			ProductID: record[0],
 			OrderDate: record[1],
 			Price:     priceProduct,
