@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/shopspring/decimal"
 	dtoLimits "github.com/viictormg/product-api-meli/internal/application/product/dto"
 	ports "github.com/viictormg/product-api-meli/internal/application/product/ports"
 	"github.com/viictormg/product-api-meli/internal/domain/constants"
@@ -77,11 +78,11 @@ func (p *productUsecase) priceIsInrage(ctx context.Context, product dto.UpdatePr
 		return false, err
 	}
 
-	if limits.CurrentPrice == product.Price {
+	if limits.CurrentPrice.Equal(product.Price) {
 		return true, errors.New("price is the same")
 	}
 
-	return product.Price >= limits.Min && product.Price <= limits.Max, nil
+	return product.Price.GreaterThanOrEqual(limits.Min) && product.Price.LessThanOrEqual(limits.Max), nil
 }
 
 func (p *productUsecase) SaveLimitsPriceCache(ctx context.Context, product dto.UpdatePriceRequest) error {
@@ -111,11 +112,14 @@ func (p *productUsecase) GetLimitsPriceDB(productID string) (*dtoLimits.PriceLim
 		return &dtoLimits.PriceLimitsDTO{}, err
 	}
 
-	minLimit := stats.Average - constants.FactorLimitMin*stats.StandardDeviation
-	maxLimit := stats.Average + constants.FactorLimitMax*stats.StandardDeviation
+	factorMin := decimal.NewFromFloat(constants.FactorLimitMin)
+	factorMax := decimal.NewFromFloat(constants.FactorLimitMax)
 
-	if minLimit < 0 {
-		minLimit = 0
+	minLimit := stats.Average.Sub(factorMin.Mul(stats.StandardDeviation))
+	maxLimit := stats.Average.Add(factorMax.Mul(stats.StandardDeviation))
+
+	if minLimit.LessThan(decimal.Zero) {
+		minLimit = decimal.Zero
 	}
 
 	return &dtoLimits.PriceLimitsDTO{

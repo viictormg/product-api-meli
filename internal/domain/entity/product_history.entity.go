@@ -2,13 +2,14 @@ package entity
 
 import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
+	"github.com/shopspring/decimal"
 )
 
 type ProductHistoryEntity struct {
-	ID          string  `gorm:"primaryKey"`
-	ProductId   string  `gorm:"column:product_id"`
-	Price       float64 `gorm:"column:price"`
-	OrderClosed string  `gorm:"column:order_closed"`
+	ID          string          `gorm:"primaryKey"`
+	ProductId   string          `gorm:"column:product_id"`
+	Price       decimal.Decimal `gorm:"column:price"`
+	OrderClosed string          `gorm:"column:order_closed"`
 }
 
 func (p ProductHistoryEntity) IsEmpty() bool {
@@ -21,7 +22,7 @@ func (ProductHistoryEntity) TableName() string {
 
 func NewProductHistoryEntity(
 	productId string,
-	price float64,
+	price decimal.Decimal,
 	orderClosed string,
 ) ProductHistoryEntity {
 	uid, _ := gonanoid.New(20)

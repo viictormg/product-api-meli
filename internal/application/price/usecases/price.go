@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"mime/multipart"
-	"strconv"
 
+	"github.com/shopspring/decimal"
 	"github.com/viictormg/product-api-meli/internal/application/price/dto"
 	"github.com/viictormg/product-api-meli/internal/application/price/ports"
 	"github.com/viictormg/product-api-meli/internal/domain/constants"
@@ -47,8 +47,11 @@ func ConverteData(data [][]string) []byte {
 	items := []dto.PriceHistory{}
 
 	for _, record := range data {
-		priceProduct, _ := strconv.ParseFloat(record[2], 32)
-
+		priceProduct, err := decimal.NewFromString(record[2])
+		if err != nil {
+			fmt.Println("Error to convert price to decimal", record[2])
+			continue
+		}
 		price := dto.PriceHistory{
 			ProductID: record[0],
 			OrderDate: record[1],

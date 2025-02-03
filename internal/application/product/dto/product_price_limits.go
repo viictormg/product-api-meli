@@ -1,7 +1,9 @@
 package dto
 
+import "github.com/shopspring/decimal"
+
 type PriceLimitsDTO struct {
-	Min          float64
-	Max          float64
-	CurrentPrice float64
+	Min          decimal.Decimal
+	Max          decimal.Decimal
+	CurrentPrice decimal.Decimal
 }
