@@ -6,11 +6,14 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/viictormg/product-api-meli/config"
 	"go.uber.org/fx"
 )
 
-func NewHTTPServer(lc fx.Lifecycle) *echo.Echo {
-	srv := &http.Server{Addr: ":3000"}
+func NewHTTPServer(lc fx.Lifecycle, cfg *config.Config) *echo.Echo {
+	srv := &http.Server{
+		Addr: fmt.Sprint(":", cfg.ServerPort),
+	}
 	echoServer := echo.New()
 
 	lc.Append(fx.Hook{

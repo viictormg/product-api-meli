@@ -8,17 +8,18 @@ import (
 )
 
 type Config struct {
-	DbHost    string   `mapstructure:"DB_HOST"`
-	DbPort    string   `mapstructure:"DB_PORT"`
-	DbUser    string   `mapstructure:"DB_USER"`
-	DbPass    string   `mapstructure:"DB_PASS"`
-	Brokers   []string `mapstructure:"KAFKA_BROKERS"`
-	Topic     string   `mapstructure:"KAFKA_TOPIC"`
-	SslMode   string   `mapstructure:"SSL_MODE"`
-	DbName    string   `mapstructure:"DB_NAME"`
-	retry     int      `mapstructure:"KAFKA_RETRY"`
-	RedisHost string   `mapstructure:"REDIS_HOST"`
-	RedisPort string   `mapstructure:"REDIS_PORT"`
+	ServerPort string   `mapstructure:"SERVER_PORT"`
+	DbHost     string   `mapstructure:"DB_HOST"`
+	DbPort     string   `mapstructure:"DB_PORT"`
+	DbUser     string   `mapstructure:"DB_USER"`
+	DbPass     string   `mapstructure:"DB_PASS"`
+	Brokers    []string `mapstructure:"KAFKA_BROKERS"`
+	Topic      string   `mapstructure:"KAFKA_TOPIC"`
+	SslMode    string   `mapstructure:"SSL_MODE"`
+	DbName     string   `mapstructure:"DB_NAME"`
+	retry      int      `mapstructure:"KAFKA_RETRY"`
+	RedisHost  string   `mapstructure:"REDIS_HOST"`
+	RedisPort  string   `mapstructure:"REDIS_PORT"`
 }
 
 type KafkaConfig struct {
