@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
+	"github.com/sirupsen/logrus"
 	dtoLimits "github.com/viictormg/product-api-meli/internal/application/product/dto"
 	ports "github.com/viictormg/product-api-meli/internal/application/product/ports"
 	"github.com/viictormg/product-api-meli/internal/domain/constants"
@@ -35,10 +36,12 @@ func NewProductUsecase(
 func (p *productUsecase) UpdatePrice(ctx context.Context, product dto.UpdatePriceRequest) error {
 	priceIsInrage, err := p.priceIsInrage(ctx, product)
 	if err != nil {
+		logrus.Error(err)
 		return err
 	}
 
 	if !priceIsInrage {
+		logrus.Error(err)
 		return errors.New("price is anomalous")
 	}
 
@@ -55,12 +58,14 @@ func (p *productUsecase) UpdatePriceProduct(ctx context.Context, product dto.Upd
 	trx, err := p.respositoryHistory.CreateProductHistory(ctx, productHistory)
 
 	if err != nil {
+		logrus.Error(err)
 		trx.Rollback()
 	}
 
 	err = p.SaveLimitsPriceCache(ctx, product)
 
 	if err != nil {
+		logrus.Error(err)
 		trx.Rollback()
 	}
 
@@ -68,19 +73,22 @@ func (p *productUsecase) UpdatePriceProduct(ctx context.Context, product dto.Upd
 }
 
 func (p *productUsecase) priceIsInrage(ctx context.Context, product dto.UpdatePriceRequest) (bool, error) {
-	limits, err := p.GetLimitsPriceCache(product.ProductID)
+	limits, err := p.GetLimitsPriceCache(ctx, product.ProductID)
 	if err != nil || limits == nil {
 		err := p.SaveLimitsPriceCache(ctx, product)
 		if err != nil {
+			logrus.Error(err)
 			return false, err
 		}
-		limits, err = p.GetLimitsPriceCache(product.ProductID)
+		limits, err = p.GetLimitsPriceCache(ctx, product.ProductID)
 		if err != nil || limits == nil {
+			logrus.Error(err)
 			return false, err
 		}
 	}
 
 	if err != nil || limits == nil {
+		logrus.Error(err)
 		return false, err
 	}
 
@@ -94,6 +102,7 @@ func (p *productUsecase) priceIsInrage(ctx context.Context, product dto.UpdatePr
 func (p *productUsecase) SaveLimitsPriceCache(ctx context.Context, product dto.UpdatePriceRequest) error {
 	limits, err := p.GetLimitsPriceDB(product.ProductID)
 	if err != nil || limits == nil {
+		logrus.Error(err)
 		return err
 	}
 
@@ -104,15 +113,20 @@ func (p *productUsecase) SaveLimitsPriceCache(ctx context.Context, product dto.U
 
 	limits.CurrentPrice = productFound.Price
 
-	return p.repositoryCache.SaveProductHistory(product.ProductID, limits)
+	return p.repositoryCache.SaveProductHistory(ctx, product.ProductID, limits)
 }
 
-func (p *productUsecase) GetLimitsPriceCache(product string) (*dtoLimits.PriceLimitsDTO, error) {
-	return p.repositoryCache.GetProductHistory(product)
+func (p *productUsecase) GetLimitsPriceCache(ctx context.Context, product string) (*dtoLimits.PriceLimitsDTO, error) {
+	return p.repositoryCache.GetProductHistory(ctx, product)
 }
 
 func (p *productUsecase) GetLimitsPriceDB(productID string) (*dtoLimits.PriceLimitsDTO, error) {
 	stats, err := p.respositoryHistory.GetAverageAndDeviation(productID)
+
+	if stats.Average == decimal.Zero || stats.StandardDeviation == decimal.Zero {
+		logrus.Warn(err)
+		return &dtoLimits.PriceLimitsDTO{}, errors.New("no data found")
+	}
 
 	if err != nil {
 		return &dtoLimits.PriceLimitsDTO{}, err

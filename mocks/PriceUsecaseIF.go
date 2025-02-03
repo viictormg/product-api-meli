@@ -3,6 +3,7 @@
 package mocks
 
 import (
+	context "context"
 	multipart "mime/multipart"
 
 	mock "github.com/stretchr/testify/mock"
@@ -13,17 +14,17 @@ type PriceUsecaseIF struct {
 	mock.Mock
 }
 
-// UploadPriceFile provides a mock function with given fields: _a0
-func (_m *PriceUsecaseIF) UploadPriceFile(_a0 *multipart.FileHeader) error {
-	ret := _m.Called(_a0)
+// UploadPriceFile provides a mock function with given fields: ctx, file
+func (_m *PriceUsecaseIF) UploadPriceFile(ctx context.Context, file *multipart.FileHeader) error {
+	ret := _m.Called(ctx, file)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UploadPriceFile")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*multipart.FileHeader) error); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(context.Context, *multipart.FileHeader) error); ok {
+		r0 = rf(ctx, file)
 	} else {
 		r0 = ret.Error(0)
 	}

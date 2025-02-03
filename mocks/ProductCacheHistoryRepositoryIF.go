@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	mock "github.com/stretchr/testify/mock"
 	dto "github.com/viictormg/product-api-meli/internal/application/product/dto"
 )
@@ -12,9 +14,9 @@ type ProductCacheHistoryRepositoryIF struct {
 	mock.Mock
 }
 
-// GetProductHistory provides a mock function with given fields: productId
-func (_m *ProductCacheHistoryRepositoryIF) GetProductHistory(productId string) (*dto.PriceLimitsDTO, error) {
-	ret := _m.Called(productId)
+// GetProductHistory provides a mock function with given fields: ctx, productId
+func (_m *ProductCacheHistoryRepositoryIF) GetProductHistory(ctx context.Context, productId string) (*dto.PriceLimitsDTO, error) {
+	ret := _m.Called(ctx, productId)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetProductHistory")
@@ -22,19 +24,19 @@ func (_m *ProductCacheHistoryRepositoryIF) GetProductHistory(productId string) (
 
 	var r0 *dto.PriceLimitsDTO
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (*dto.PriceLimitsDTO, error)); ok {
-		return rf(productId)
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*dto.PriceLimitsDTO, error)); ok {
+		return rf(ctx, productId)
 	}
-	if rf, ok := ret.Get(0).(func(string) *dto.PriceLimitsDTO); ok {
-		r0 = rf(productId)
+	if rf, ok := ret.Get(0).(func(context.Context, string) *dto.PriceLimitsDTO); ok {
+		r0 = rf(ctx, productId)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*dto.PriceLimitsDTO)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(productId)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, productId)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -42,17 +44,17 @@ func (_m *ProductCacheHistoryRepositoryIF) GetProductHistory(productId string) (
 	return r0, r1
 }
 
-// SaveProductHistory provides a mock function with given fields: productId, limits
-func (_m *ProductCacheHistoryRepositoryIF) SaveProductHistory(productId string, limits *dto.PriceLimitsDTO) error {
-	ret := _m.Called(productId, limits)
+// SaveProductHistory provides a mock function with given fields: ctx, productId, limits
+func (_m *ProductCacheHistoryRepositoryIF) SaveProductHistory(ctx context.Context, productId string, limits *dto.PriceLimitsDTO) error {
+	ret := _m.Called(ctx, productId, limits)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SaveProductHistory")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, *dto.PriceLimitsDTO) error); ok {
-		r0 = rf(productId, limits)
+	if rf, ok := ret.Get(0).(func(context.Context, string, *dto.PriceLimitsDTO) error); ok {
+		r0 = rf(ctx, productId, limits)
 	} else {
 		r0 = ret.Error(0)
 	}

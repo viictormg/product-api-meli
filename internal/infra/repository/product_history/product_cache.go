@@ -20,28 +20,23 @@ func NewProductCacheHistoryRepository(db *redis.Client) ports.ProductCacheHistor
 	return &ProductCacheHistoryRepository{db}
 }
 
-func (pr *ProductCacheHistoryRepository) SaveProductHistory(productId string, stats *dto.PriceLimitsDTO) error {
-	//	Key: "price:MLB4432316952"
-	//
-	// Value: { "last_prices": [22.01, 19.809, 21.5], "avg": 21.1, "stddev": 1.2 }
-	// TTL: 24 horas
+func (pr *ProductCacheHistoryRepository) SaveProductHistory(ctx context.Context, productId string, stats *dto.PriceLimitsDTO) error {
 	key := productId
 	value, err := json.Marshal(stats)
 	if err != nil {
 		return err
 	}
 
-	// Set the value in Redis with a TTL of 24 hours
-	err = pr.db.Set(context.Background(), key, value, 24*time.Hour).Err()
+	err = pr.db.Set(ctx, key, value, 24*time.Hour).Err()
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (pr *ProductCacheHistoryRepository) GetProductHistory(productId string) (*dto.PriceLimitsDTO, error) {
+func (pr *ProductCacheHistoryRepository) GetProductHistory(ctx context.Context, productId string) (*dto.PriceLimitsDTO, error) {
 	key := productId
-	value, err := pr.db.Get(context.Background(), key).Result()
+	value, err := pr.db.Get(ctx, key).Result()
 	if err == redis.Nil {
 		log.Println("No history found for product ID", productId)
 		return nil, errors.New("no history found")

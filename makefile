@@ -19,5 +19,12 @@ migrateup:
 migratedown:
 	migrate -path ./db/migrations -database "postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable" -verbose down
 
+.PHONY: compose-up
 mocks:
+	rm -fr ./mocks
 	mockery --dir=./internal --all
+
+.PHONY: watch-coverage
+watch-coverage:
+	go test ./... -cover -coverprofile=coverage.out
+	go tool cover -html=coverage.out
