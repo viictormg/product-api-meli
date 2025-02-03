@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"context"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -13,7 +14,7 @@ import (
 )
 
 type PriceUsecaseIF interface {
-	UploadPriceFile(*multipart.FileHeader) error
+	UploadPriceFile(ctx context.Context, file *multipart.FileHeader) error
 }
 
 type PriceUsecase struct {
@@ -26,7 +27,7 @@ func NewPriceUsecase(event ports.PriceEventyIF) PriceUsecaseIF {
 	}
 }
 
-func (h *PriceUsecase) UploadPriceFile(file *multipart.FileHeader) error {
+func (h *PriceUsecase) UploadPriceFile(ctx context.Context, file *multipart.FileHeader) error {
 	data, err := extracDataFile(file)
 
 	if err != nil {

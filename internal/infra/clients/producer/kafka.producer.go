@@ -16,8 +16,6 @@ type KafkaProducer struct {
 func NewKafkaProducer(config *config.Config) *KafkaProducer {
 	kafkaConfig := config.GeKafkaConfg()
 
-	fmt.Println("DDD", kafkaConfig.Topic)
-
 	cfg := sarama.NewConfig()
 	cfg.Producer.Return.Successes = true
 	cfg.Producer.RequiredAcks = sarama.WaitForAll

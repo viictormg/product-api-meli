@@ -70,8 +70,14 @@ func (p *productUsecase) UpdatePriceProduct(ctx context.Context, product dto.Upd
 func (p *productUsecase) priceIsInrage(ctx context.Context, product dto.UpdatePriceRequest) (bool, error) {
 	limits, err := p.GetLimitsPriceCache(product.ProductID)
 	if err != nil || limits == nil {
-		p.SaveLimitsPriceCache(ctx, product)
+		err := p.SaveLimitsPriceCache(ctx, product)
+		if err != nil {
+			return false, err
+		}
 		limits, err = p.GetLimitsPriceCache(product.ProductID)
+		if err != nil || limits == nil {
+			return false, err
+		}
 	}
 
 	if err != nil || limits == nil {
