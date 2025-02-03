@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/shopspring/decimal"
@@ -41,6 +42,25 @@ func TestUpdatePrice(t *testing.T) {
 		assert.EqualError(t, err, "price is the same")
 	})
 
-	t.Run("should return an error ", func(t *testing.T) {})
+	t.Run("should return an error save limits calcualted", func(t *testing.T) {
+		respositoryHistoryMock := mocks.NewProductHistoryRepositoryIF(t)
+		repositoryCacheMock := mocks.NewProductCacheHistoryRepositoryIF(t)
+
+		repositoryCacheMock.On("GetProductHistory", ctx, requestMock.ProductID).
+			Return(nil, errors.New("limits not found"))
+
+		respositoryHistoryMock.On("GetAverageAndDeviation", requestMock.ProductID).
+			Return(dtoLimits.PriceStatsDTO{
+				Average:           decimal.Zero,
+				StandardDeviation: decimal.Zero,
+			}, nil)
+
+		productApp := NewProductUsecase(respositoryHistoryMock, repositoryCacheMock)
+
+		err := productApp.UpdatePrice(ctx, requestMock)
+
+		assert.NotNil(t, err)
+		assert.EqualError(t, err, "no data found")
+	})
 
 }
