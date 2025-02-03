@@ -3,7 +3,6 @@ package usecases
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	dtoLimits "github.com/viictormg/product-api-meli/internal/application/product/dto"
@@ -81,8 +80,6 @@ func (p *productUsecase) priceIsInrage(ctx context.Context, product dto.UpdatePr
 	if limits.CurrentPrice == product.Price {
 		return true, errors.New("price is the same")
 	}
-
-	fmt.Println(product.Price, "UP:", limits.Min, "DOWM:", limits.Max)
 
 	return product.Price >= limits.Min && product.Price <= limits.Max, nil
 }
