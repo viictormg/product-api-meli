@@ -2,6 +2,7 @@ package infra
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/viictormg/product-api-meli/config"
 	usecasePrice "github.com/viictormg/product-api-meli/internal/application/price/usecases"
 	"github.com/viictormg/product-api-meli/internal/application/product/usecases"
 	handlerPrice "github.com/viictormg/product-api-meli/internal/infra/api/handler/price"
@@ -9,6 +10,8 @@ import (
 	groupPrice "github.com/viictormg/product-api-meli/internal/infra/api/router/group/price"
 	group "github.com/viictormg/product-api-meli/internal/infra/api/router/group/product"
 	"github.com/viictormg/product-api-meli/internal/infra/clients/db"
+	"github.com/viictormg/product-api-meli/internal/infra/clients/producer"
+	"github.com/viictormg/product-api-meli/internal/infra/events"
 	repo "github.com/viictormg/product-api-meli/internal/infra/repository/product"
 	repoHistory "github.com/viictormg/product-api-meli/internal/infra/repository/product_history"
 
@@ -17,21 +20,28 @@ import (
 
 func Run() {
 	fx.New(
+		fx.Provide(config.NewConfig),
 		fx.Provide(NewHTTPServer),
 		fx.Provide(db.NewPostgresConnection),
 		fx.Provide(db.NewRedisConnection),
+		fx.Provide(producer.NewKafkaProducer),
+		// respositories
 		fx.Provide(repo.NewProductRepository),
 		fx.Provide(repoHistory.NewProductHistoryRepository),
 		fx.Provide(repoHistory.NewProductCacheHistoryRepository),
+		fx.Provide(events.NewPriceEvent),
+
+		// usecases
 		fx.Provide(usecasePrice.NewPriceUsecase),
 		fx.Provide(usecases.NewProductUsecase),
 
-		// route
+		// handlers
 		fx.Provide(NewEchoGroup),
-
-		fx.Provide(group.NewProductInterfaceRoutes),
 		fx.Provide(product.NewProductHandler),
 		fx.Provide(handlerPrice.NewPriceHandler),
+
+		// routes
+		fx.Provide(group.NewProductInterfaceRoutes),
 		fx.Provide(groupPrice.NewPriceInterfaceRoutes),
 
 		// init functions

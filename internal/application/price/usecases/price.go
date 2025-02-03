@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"mime/multipart"
-	"slices"
 	"strconv"
 
+	"github.com/viictormg/product-api-meli/internal/application/price/ports"
 	"github.com/viictormg/product-api-meli/internal/domain/constants"
 )
 
@@ -15,11 +15,14 @@ type PriceUsecaseIF interface {
 	UploadPriceFile(*multipart.FileHeader) error
 }
 
-func NewPriceUsecase() PriceUsecaseIF {
-	return &PriceUsecase{}
+type PriceUsecase struct {
+	event ports.PriceEventyIF
 }
 
-type PriceUsecase struct {
+func NewPriceUsecase(event ports.PriceEventyIF) PriceUsecaseIF {
+	return &PriceUsecase{
+		event: event,
+	}
 }
 
 type PriceHistory struct {
@@ -36,12 +39,12 @@ func (h *PriceUsecase) UploadPriceFile(file *multipart.FileHeader) error {
 	}
 
 	for _, chunk := range data {
-
 		message := ConverteData(chunk)
-
-		PushPrice("price", message)
-
+		// PushPrice("price", message)
+		h.event.SendPriceEvent(message)
 	}
+
+	h.event.Close()
 
 	return nil
 }
@@ -49,14 +52,8 @@ func (h *PriceUsecase) UploadPriceFile(file *multipart.FileHeader) error {
 func ConverteData(data [][]string) []byte {
 	items := []PriceHistory{}
 
-	productIDs := []string{}
-
 	for _, record := range data {
 		priceProduct, _ := strconv.ParseFloat(record[2], 32)
-
-		if !slices.Contains(productIDs, record[0]) {
-			productIDs = append(productIDs, record[0])
-		}
 
 		price := PriceHistory{
 			ProductID: record[0],
@@ -67,9 +64,12 @@ func ConverteData(data [][]string) []byte {
 		items = append(items, price)
 	}
 
-	fmt.Println("Product IDs: ", productIDs)
-	jsonMessage, _ := json.Marshal(items)
-	return jsonMessage
+	messageDecode, err := json.Marshal(items)
+
+	if err != nil {
+		fmt.Println("Error to convert data to json")
+	}
+	return messageDecode
 }
 
 func chunkData(data [][]string, chunkSize int) [][][]string {
